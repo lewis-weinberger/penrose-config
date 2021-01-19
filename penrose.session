@@ -1,0 +1,7 @@
+#!/bin/sh
+
+xsetroot -solid grey30
+
+pgrep status_bar.sh > /dev/null || /usr/local/bin/status_bar.sh &
+
+exec ${HOME}/.cargo/bin/penrose_config &> ${HOME}/.penrose.log

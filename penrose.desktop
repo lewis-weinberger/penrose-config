@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=penrose
+Comment=penrose window manager
+Exec=/etc/X11/Sessions/penrose.session
+Icon=
+Type=Application

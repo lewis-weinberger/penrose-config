@@ -1,0 +1,9 @@
+[package]
+name = "penrose_config"
+version = "0.1.0"
+authors = ["lewis-weinberger"]
+edition = "2018"
+
+[dependencies]
+penrose = "0.2"
+simplelog = "0.8"
