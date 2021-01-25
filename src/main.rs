@@ -18,11 +18,12 @@ use penrose::{
     draw::{dwm_bar, Color, TextStyle},
     logging_error_handler,
     xcb::{XcbConnection, XcbDraw, XcbHooks},
-    Backward, Forward, Less, More,
+    Backward, Forward, Less, More, PenroseError, Result,
 };
 
 use simplelog::{LevelFilter, SimpleLogger};
 use std::collections::HashMap;
+use std::convert::TryFrom;
 
 // Default programs
 const TERMINAL: &str = "alacritty";
@@ -32,26 +33,21 @@ const PASSWORDS: &str = "passmenu";
 const LOCKER: &str = "xscreensaver-command -lock";
 
 // Style
-const NORMAL: u32 = 0x9EEEEE;
-const FOCUS: u32 = 0x55AAAA;
-const GREY: u32 = 0x4D4D4D;
+const NORMAL: &str = "#9EEEEE";
+const FOCUS: &str = "#55AAAA";
+const GREY: &str = "#4D4D4D";
 const NMAIN: u32 = 1;
 const RATIO: f32 = 0.55;
 const HEIGHT: usize = 18;
 const FONT: &str = "xos4 Terminus";
 
-// Create a new Color from a hex encoded u32: 0xRRGGBB
-pub fn new_from_hex_rgb(hex: u32) -> Color {
-    Color::new_from_hex((hex << 8) + 0xFF)
-}
-
-fn create_config() -> Result<Config, String> {
+fn create_config() -> Result<Config> {
     let mut config_builder = Config::default().builder();
     config_builder
         .workspaces(vec!["1", "2", "3", "4", "5", "6"])
         .floating_classes(vec!["dmenu"])
-        .focused_border(FOCUS)
-        .unfocused_border(NORMAL)
+        .focused_border(FOCUS)?
+        .unfocused_border(NORMAL)?
         .border_px(4)
         .gap_px(8)
         .show_bar(true);
@@ -61,10 +57,10 @@ fn create_config() -> Result<Config, String> {
         Layout::floating("[F]"),
     ]);
 
-    config_builder.build()
+    config_builder.build().map_err(PenroseError::Raw)
 }
 
-fn create_hooks(config: &Config) -> penrose::Result<XcbHooks> {
+fn create_hooks(config: &Config) -> Result<XcbHooks> {
     let hooks: XcbHooks = vec![
         LayoutSymbolAsRootName::new(),
         Box::new(dwm_bar(
@@ -73,12 +69,12 @@ fn create_hooks(config: &Config) -> penrose::Result<XcbHooks> {
             &TextStyle {
                 font: FONT.to_string(),
                 point_size: 12,
-                fg: new_from_hex_rgb(FOCUS),
-                bg: Some(new_from_hex_rgb(GREY)),
+                fg: Color::try_from(FOCUS)?,
+                bg: Some(Color::try_from(GREY)?),
                 padding: (4.0, 4.0),
             },
-            new_from_hex_rgb(GREY),
-            new_from_hex_rgb(GREY),
+            Color::try_from(GREY)?,
+            Color::try_from(GREY)?,
             config.workspaces().clone(),
         )?),
     ];
@@ -86,7 +82,7 @@ fn create_hooks(config: &Config) -> penrose::Result<XcbHooks> {
     Ok(hooks)
 }
 
-fn create_bindings<X: XConn>(config: &Config) -> KeyBindings<X> {
+fn create_bindings<X: XConn>() -> KeyBindings<X> {
     gen_keybindings! {
         // Program launch
         "M-semicolon" => run_external!(LAUNCHER);
@@ -121,20 +117,20 @@ fn create_bindings<X: XConn>(config: &Config) -> KeyBindings<X> {
         "M-A-s" => run_internal!(detect_screens);
         "M-S-q" => run_internal!(exit);
 
-        refmap [ config.ws_range() ] in {
-            "M-{}" => focus_workspace [ index_selectors(config.workspaces().len()) ];
-            "M-S-{}" => client_to_workspace [ index_selectors(config.workspaces().len()) ];
+        map: { "1", "2", "3", "4", "5", "6" } to index_selectors(6) => {
+            "M-{}" => focus_workspace (REF);
+            "M-S-{}" => client_to_workspace (REF);
         };
     }
 }
 
-fn main() -> penrose::Result<()> {
+fn main() -> Result<()> {
     SimpleLogger::init(LevelFilter::Info, simplelog::Config::default())
         .expect("failed to init logging");
 
     let config = create_config().expect("Failed to build configuration!");
     let hooks = create_hooks(&config)?;
-    let key_bindings = create_bindings(&config);
+    let key_bindings = create_bindings();
 
     let conn = XcbConnection::new()?;
     let mut wm = WindowManager::new(config, conn, hooks, logging_error_handler());

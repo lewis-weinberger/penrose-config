@@ -5,5 +5,5 @@ authors = ["lewis-weinberger"]
 edition = "2018"
 
 [dependencies]
-penrose = "0.2"
+penrose = { git = "https://github.com/sminez/penrose", branch = "develop" }
 simplelog = "0.8"

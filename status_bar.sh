@@ -12,4 +12,3 @@ while true; do
     TEMP="$(awk '{ printf "%.1fC", $1/1000.0 }' < $ZONE)"
     xsetroot -name "cpu $CPU | mem $MEM | net $WIFI | vol $VOL | temp $TEMP | $TIME | $DATE"
 done
-

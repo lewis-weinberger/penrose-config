@@ -326,8 +326,7 @@ dependencies = [
 [[package]]
 name = "penrose"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf21b342c3b5241cd3de018f8abedf996ef0848ad5c807390bf78bd22ac9bc24"
+source = "git+https://github.com/sminez/penrose?branch=develop#856ce519af0f2c0a7ba5d39b7e9f57d27cc187d8"
 dependencies = [
  "cairo-rs",
  "cairo-sys-rs",
@@ -335,6 +334,7 @@ dependencies = [
  "nix",
  "pango",
  "pangocairo",
+ "penrose_proc",
  "strum 0.19.5",
  "strum_macros 0.19.4",
  "thiserror",
@@ -347,6 +347,27 @@ version = "0.1.0"
 dependencies = [
  "penrose",
  "simplelog",
+]
+
+[[package]]
+name = "penrose_keysyms"
+version = "0.1.0"
+source = "git+https://github.com/sminez/penrose?branch=develop#856ce519af0f2c0a7ba5d39b7e9f57d27cc187d8"
+dependencies = [
+ "strum 0.19.5",
+ "strum_macros 0.19.4",
+]
+
+[[package]]
+name = "penrose_proc"
+version = "0.1.2"
+source = "git+https://github.com/sminez/penrose?branch=develop#856ce519af0f2c0a7ba5d39b7e9f57d27cc187d8"
+dependencies = [
+ "penrose_keysyms",
+ "proc-macro2",
+ "quote",
+ "strum 0.19.5",
+ "syn",
 ]
 
 [[package]]
